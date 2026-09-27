@@ -79,32 +79,15 @@ git push -u origin main
 2. فعّل **YouTube Data API v3** من "APIs & Services > Library".
 3. من "APIs & Services > Credentials" أنشئ **OAuth client ID** من نوع **Desktop app**.
    احفظ `Client ID` و `Client Secret`.
-4. شغّل هذا السكربت المساعد محليًا مرة واحدة فقط (على جهازك):
+4. شغّل السكربت المساعد محليًا مرة واحدة فقط (على جهازك):
 
-```python
-# get_refresh_token.py — شغّله مرة واحدة فقط ثم احذفه
-from google_auth_oauthlib.flow import InstalledAppFlow
-
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
-flow = InstalledAppFlow.from_client_config(
-    {
-        "installed": {
-            "client_id": "ضع Client ID هنا",
-            "client_secret": "ضع Client Secret هنا",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": ["http://localhost"],
-        }
-    },
-    SCOPES,
-)
-creds = flow.run_local_server(port=0)
-print("YT_REFRESH_TOKEN =", creds.refresh_token)
+```bash
+python get_refresh_token.py
 ```
 
-سيفتح متصفحًا لتسجيل الدخول بحساب يوتيوب الخاص بالقناة، وفي النهاية
-يطبع `refresh_token` — احفظه، هذا هو المفتاح الذي يسمح للنظام بالرفع آليًا
-للأبد بدون تسجيل دخول مرة أخرى.
+أدخل `Client ID` و`Client Secret` عند الطلب. سيفتح متصفحًا لتسجيل الدخول بحساب
+يوتيوب الخاص بالقناة والموافقة على صلاحية الرفع. سيطبع السكربت `YT_REFRESH_TOKEN`
+مرة واحدة؛ احفظه كـ GitHub Actions secret ولا تضفه إلى ملفات المشروع أو Git.
 
 ---
 
