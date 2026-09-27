@@ -1,0 +1,20 @@
+# Local credentials and OAuth artifacts
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+client_secret*.json
+
+# Python virtual environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Generated run data and logs; keep the workflow's used_topics.json tracked
+data/*/
+logs/*
+*.mp4
+*.mp3
+*.wav

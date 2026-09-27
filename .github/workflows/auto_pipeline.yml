@@ -1,0 +1,65 @@
+name: Auto YouTube Pipeline
+
+on:
+  # أبقِ الجدولة متوقفة حتى تجربة التشغيل اليدوي ومراجعة أول فيديو خاص.
+  # لتفعيلها بعد المراجعة، أزل التعليق عن السطور التالية:
+  # schedule:
+  #   - cron: "0 12 * * 1,4"
+  workflow_dispatch: {}   # يسمح بتشغيل يدوي فوري من تبويب Actions في GitHub
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run the automated pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          STABILITY_API_KEY: ${{ secrets.STABILITY_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
+
+      # يحفظ سجل المواضيع المستخدمة بين مرة وأخرى حتى لا يتكرر أي موضوع
+      - name: Commit updated topic history
+        if: always()
+        run: |
+          git config user.name "auto-pipeline-bot"
+          git config user.email "actions@github.com"
+          git add data/used_topics.json || true
+          git commit -m "chore: update used topics [skip ci]" || echo "لا تغييرات لحفظها"
+          git push || echo "لا شيء لدفعه"
+
+      - name: Upload run artifacts (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-run-${{ github.run_id }}
+          path: |
+            data/**/script.json
+          retention-days: 14

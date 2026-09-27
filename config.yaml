@@ -1,0 +1,51 @@
+# =========================================================
+# إعدادات القناة والمحتوى — عدّل هذا الملف حسب مشروعك
+# =========================================================
+
+channel:
+  name: "قناة عبود البطل"
+  niche: "Historical Documentary / History Storytelling"
+  language: "en"                 # لغة السكربت والصوت النهائي
+  video_length_minutes: 12       # الطول التقريبي المستهدف للفيديو
+  upload_privacy: "private"      # private / unlisted / public
+  # ابدأ بـ private دائمًا للمراجعة اليدوية قبل التحويل إلى public
+
+# خطوة "تحليل قناة ناجحة" (كما في الفيديو المرجعي) — تُنفَّذ تلقائيًا قبل اختيار
+# الموضوع إذا فعّلتها، وتقترح عناوين جديدة بنفس نمط قناة ناجحة موجودة فعليًا
+channel_analysis:
+  enabled: false                 # فعّلها بوضع true بعد إضافة YOUTUBE_API_KEY
+  reference_channel_id: ""       # مثال: UC.......... (من صفحة القناة المرجعية)
+
+# مواضيع أولية احتياطية تُستخدم إذا كان channel_analysis معطّلاً أو فشل
+seed_topics:
+  - "What Did Medieval Kings Do All Day?"
+  - "What Did Vikings Do All Day?"
+  - "The Ingenious Design of Roman Victory Tunnels"
+  - "How Ancient Egyptians Built the Pyramids"
+  - "Daily Life of a Samurai Warrior"
+  - "The Secret Tunnels of Medieval Castles"
+
+# مزوّدو الخدمة (Providers) — استبدل حسب الحسابات المتاحة لديك
+providers:
+  llm: "anthropic"          # anthropic | openai
+  image: "openai"           # openai | stability
+  tts: "edge-tts"           # edge-tts (مجاني بدون مفتاح) | elevenlabs
+
+image:
+  style: "painting"         # realistic | painting | 3d_model | drawing | comic | bw | low_poly
+  aspect_ratio: "16:9"
+  images_per_video: 10      # عدد المشاهد/الصور لكل فيديو
+
+video:
+  fps: 30
+  resolution: "1920x1080"
+  ken_burns: true            # حركة تكبير/بانّ بطيئة على الصور الثابتة
+  background_music_path: "assets/bg_music.mp3"   # اختياري — ضع ملفًا هنا أو اتركه فارغًا
+
+thumbnail:
+  font_path: "assets/font_bold.ttf"   # ضع أي خط Bold هنا
+  accent_color: "#FFD400"
+
+schedule:
+  # صيغة cron (UTC) — راجع ملف GitHub Actions أدناه لتفعيلها فعليًا
+  cron: "0 12 * * 1,4"       # كل اثنين وخميس الساعة 12:00 UTC
