@@ -4,13 +4,13 @@
 (هذه هي المشكلة الملاحظة في الفيديو المرجعي).
 """
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
 def make_thumbnail(background_path: Path, title: str, out_path: Path, config: dict) -> Path:
     thumb_cfg = config["thumbnail"]
     img = Image.open(background_path).convert("RGB")
-    img = img.resize((1280, 720))
+    img = ImageOps.fit(img, (1280, 720), method=Image.Resampling.LANCZOS)
 
     # طبقة تعتيم سفلية لتحسين وضوح النص
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))

@@ -14,11 +14,12 @@ async def _edge_tts_save(text: str, out_path: Path, voice: str = "en-US-GuyNeura
     await communicate.save(str(out_path))
 
 
-def generate_narration_audio(text: str, out_path: Path, provider: str = "edge-tts") -> Path:
+def generate_narration_audio(text: str, out_path: Path, provider: str = "edge-tts",
+                             voice: str = "en-US-GuyNeural") -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     if provider == "edge-tts":
-        asyncio.run(_edge_tts_save(text, out_path))
+        asyncio.run(_edge_tts_save(text, out_path, voice=voice))
 
     elif provider == "elevenlabs":
         import requests
@@ -39,11 +40,12 @@ def generate_narration_audio(text: str, out_path: Path, provider: str = "edge-tt
     return out_path
 
 
-def generate_all_scene_audio(script: dict, out_dir: Path, provider: str = "edge-tts") -> list:
+def generate_all_scene_audio(script: dict, out_dir: Path, provider: str = "edge-tts",
+                             voice: str = "en-US-GuyNeural") -> list:
     paths = []
     for scene in script["scenes"]:
         n = scene["scene_number"]
         out_path = out_dir / f"scene_{n:03d}.mp3"
-        generate_narration_audio(scene["narration"], out_path, provider)
+        generate_narration_audio(scene["narration"], out_path, provider, voice)
         paths.append(out_path)
     return paths

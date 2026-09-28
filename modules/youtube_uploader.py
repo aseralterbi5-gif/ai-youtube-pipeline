@@ -41,6 +41,9 @@ def upload_video(video_path: Path, thumbnail_path: Path, title: str,
         "status": {
             "privacyStatus": config["channel"].get("upload_privacy", "private"),
             "selfDeclaredMadeForKids": False,
+            "containsSyntheticMedia": bool(
+                config["channel"].get("contains_synthetic_media", False)
+            ),
         },
     }
 

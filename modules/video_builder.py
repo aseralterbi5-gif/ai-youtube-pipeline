@@ -27,22 +27,38 @@ def _get_duration(audio_path: Path) -> float:
 
 def _build_scene_clip(image_path: Path, audio_path: Path, out_path: Path,
                        resolution: str, fps: int, ken_burns: bool) -> None:
-    width, height = resolution.split("x")
+    try:
+        width, height = (int(value) for value in resolution.lower().split("x", 1))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError(f"صيغة دقة الفيديو غير صالحة: {resolution!r}") from exc
+    if width <= 0 or height <= 0 or fps <= 0:
+        raise ValueError("يجب أن تكون أبعاد الفيديو ومعدل الإطارات أكبر من صفر.")
+
     duration = _get_duration(audio_path)
-    total_frames = max(int(duration * fps), fps)
+    if duration <= 0:
+        raise ValueError(f"مدة الصوت غير صالحة: {audio_path}")
+    total_frames = max(round(duration * fps), fps)
+
+    # قصّ الصورة إلى أبعاد الفيديو مع الحفاظ على النسبة بدل تكبيرها إلى 8000px.
+    image_filter = (
+        f"scale={width}:{height}:force_original_aspect_ratio=increase,"
+        f"crop={width}:{height}"
+    )
 
     if ken_burns:
         # تكبير بطيء تدريجي من 1.0 إلى 1.08 طوال مدة المقطع
         zoom_filter = (
-            f"scale=8000:-1,zoompan=z='min(zoom+0.0007,1.08)':"
+            f"{image_filter},zoompan=z='min(zoom+0.0007,1.08)':"
             f"d={total_frames}:s={width}x{height}:fps={fps}"
         )
     else:
-        zoom_filter = f"scale={width}:{height}"
+        zoom_filter = f"{image_filter},fps={fps}"
 
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1", "-i", str(image_path),
+        # صورة واحدة في الثانية مع d=total_frames تجعل حركة zoompan تستغرق
+        # مدة الصوت كاملة؛ الحلقة الافتراضية عند 25fps كانت تقص الحركة مبكرًا.
+        "-loop", "1", "-framerate", "1", "-i", str(image_path),
         "-i", str(audio_path),
         "-vf", zoom_filter,
         "-c:v", "libx264", "-t", str(duration), "-pix_fmt", "yuv420p",
@@ -54,6 +70,13 @@ def _build_scene_clip(image_path: Path, audio_path: Path, out_path: Path,
 
 def build_video(image_paths: list, audio_paths: list, out_path: Path,
                  config: dict, work_dir: Path) -> Path:
+    if not image_paths or not audio_paths:
+        raise ValueError("لا يمكن بناء فيديو دون صور ومقاطع صوتية.")
+    if len(image_paths) != len(audio_paths):
+        raise ValueError(
+            f"عدد الصور ({len(image_paths)}) لا يطابق عدد المقاطع الصوتية ({len(audio_paths)})."
+        )
+
     resolution = config["video"]["resolution"]
     fps = config["video"]["fps"]
     ken_burns = config["video"].get("ken_burns", True)
@@ -79,10 +102,11 @@ def build_video(image_paths: list, audio_paths: list, out_path: Path,
         "-i", str(concat_list), "-c", "copy", str(merged_path),
     ])
 
-    music_path = Path(config["video"].get("background_music_path", ""))
+    music_value = config["video"].get("background_music_path") or ""
+    music_path = Path(music_value) if music_value.strip() else None
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if music_path and music_path.exists():
+    if music_path is not None and music_path.is_file():
         # مزج الموسيقى بمستوى منخفض (٠.١٥) مع الصوت الأصلي، وتكرارها إذا كانت أقصر من الفيديو
         _run([
             "ffmpeg", "-y", "-i", str(merged_path),

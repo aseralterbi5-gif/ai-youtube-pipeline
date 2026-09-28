@@ -8,6 +8,7 @@ channel:
   language: "en"                 # لغة السكربت والصوت النهائي
   video_length_minutes: 12       # الطول التقريبي المستهدف للفيديو
   upload_privacy: "private"      # private / unlisted / public
+  contains_synthetic_media: false # غيّره إلى true إذا بدت المشاهد المولّدة واقعية
   # ابدأ بـ private دائمًا للمراجعة اليدوية قبل التحويل إلى public
 
 # خطوة "تحليل قناة ناجحة" (كما في الفيديو المرجعي) — تُنفَّذ تلقائيًا قبل اختيار
@@ -30,6 +31,9 @@ providers:
   llm: "anthropic"          # anthropic | openai
   image: "openai"           # openai | stability
   tts: "edge-tts"           # edge-tts (مجاني بدون مفتاح) | elevenlabs
+
+tts:
+  voice: "en-US-GuyNeural"   # صوت edge-tts؛ اختر صوتًا يطابق لغة القناة
 
 image:
   style: "painting"         # realistic | painting | 3d_model | drawing | comic | bw | low_poly

@@ -26,7 +26,11 @@ def main() -> None:
         },
         SCOPES,
     )
-    credentials = flow.run_local_server(port=0)
+    credentials = flow.run_local_server(
+        port=0,
+        access_type="offline",
+        prompt="consent",
+    )
     if not credentials.refresh_token:
         raise SystemExit(
             "Google did not return a refresh token. Revoke prior access and try again."

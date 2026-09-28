@@ -71,7 +71,10 @@ def run_pipeline() -> str:
 
     print("5) توليد التعليق الصوتي لكل مشهد...")
     audio_paths = generate_all_scene_audio(
-        script, work_dir / "audio", provider=config["providers"]["tts"]
+        script,
+        work_dir / "audio",
+        provider=config["providers"]["tts"],
+        voice=config.get("tts", {}).get("voice", "en-US-GuyNeural"),
     )
 
     print("6) بناء الفيديو النهائي...")
